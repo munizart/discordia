@@ -1,0 +1,31 @@
+{
+  "name": "discordia",
+  "version": "1.0.0",
+  "description": "Simple discord bot",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/munizart/discordia.git"
+  },
+  "keywords": [
+    "discord",
+    "bot"
+  ],
+  "author": "",
+  "license": "SEE LICENSE IN LICENSE.md",
+  "bugs": {
+    "url": "https://github.com/munizart/discordia/issues"
+  },
+  "homepage": "https://github.com/munizart/discordia#readme",
+  "devDependencies": {
+    "jest": "^21.1.0"
+  },
+  "dependencies": {
+    "bluebird": "^3.5.0",
+    "discord.js": "^11.2.1",
+    "mongodb": "^2.2.31"
+  }
+}
