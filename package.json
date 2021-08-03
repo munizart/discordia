@@ -4,7 +4,8 @@
   "description": "Simple discord bot",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "start": "nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -21,11 +22,13 @@
   },
   "homepage": "https://github.com/munizart/discordia#readme",
   "devDependencies": {
-    "jest": "^21.1.0"
+    "jest": "^21.1.0",
+    "nodemon": "^2.0.12",
+    "standard": "^16.0.3"
   },
   "dependencies": {
     "bluebird": "^3.5.0",
     "discord.js": "^11.2.1",
-    "mongodb": "^2.2.31"
+    "mongodb": "^4.1.0"
   }
 }

@@ -1,31 +1,80 @@
-const Mentions = require('./mentions')
+const database = require('./database.js')
 
-const mentionRegexp = /<@(\d+)>/
-const karmaRegexp = /<@(\d+)>\+\+/
-const dieRegexp = /DIE!/
+const setRegex = /^!=\s*(\d+)/
+/**
+ * @param { import('discord.js').Client } client
+ */
+module.exports = function onReadyFactory (client) {
+  return function onReady () {
+    console.log('bot startup')
+    client.on('message', async function (message) {
+      const {
+        mentions,
+        content = '',
+        guild: { id: guildId }
+      } = message
+      mentions.users.forEach(async ({ id, username }) => {
+        if (content.startsWith('!+')) {
+          const { count } = await database.increment({
+            guildId,
+            username,
+            userId: id
+          })
+          message.channel.send(
+            `⬆️ ${username}: era ${count - 1}, agora é ${count}`
+          )
+        }
+        if (content.startsWith('!-')) {
+          const { count } = await database.decrement({
+            guildId,
+            username,
+            userId: id
+          })
+          message.channel.send(
+            `⬇️ ${username}: era ${count + 1}, agora é ${count}`
+          )
+        }
+        if (setRegex.test(content)) {
+          const [, quantity] = content.match(setRegex) ?? []
+          const newScore = parseInt(quantity, 10)
+          await database.set({
+            guildId,
+            username,
+            userId: id,
+            count: newScore
+          })
+          message.channel.send(`${username}: agora é ${newScore}`)
+        }
+      })
 
-module.exports = function onReadyFactory(client){
-    return function onReady(){
-        console.log('bot startup')
-        client.on('message', function(message) {
-            const {content, author} = message
+      if (content === '!>') {
+        const result = await (await database.list({ guildId })).toArray()
+        const msg = result.reduce(
+          (msg, { username, count }) => `${msg}\n${username}: \`${count}\``,
+          ''
+        )
+        message.channel.send(msg)
+      }
 
-            if (karmaRegexp.test(content)) {
-                message.reply('Karma added!')
-            }
-
-            if (dieRegexp.test(content)) {
-                console.log('you shoot me dead')
-                client.destroy()
-                process.exit(1)
-            }
-
-            if (mentionRegexp.test(content)) {
-                let [, mentionedId] = content.match(mentionRegexp)
-                let mentionerId = author.id
-            }
-
-            console.log(`[${author.username}]: ${content}`)
-        })
-    }
+      if (content === '!?') {
+        message.reply(usage)
+      }
+    })
+  }
 }
+
+const command = cmd => '`' + cmd + '`'
+const usage = `
+Comandos disponíveis
+${command('!?')}: mostra os comandos disponíveis
+${command('!>')}: Lista o score dos usuários neste server
+${command(
+  '!+ <@user> [...@users]'
+)}: incrementa o score dos usuários mencionados
+${command(
+  '!- <@user> [...@users]'
+)}: decrementa o score dos usuários mencionados
+${command(
+  '!= <score> <@user> [...@users]'
+)}: configura o score dos usuários mencionados para <score>
+`
